@@ -1,68 +1,78 @@
 <?php
 
+require_once(__DIR__.'/../vendor/autoload.php');
+
 class TableTennisMatch
 {
-  private $player1Name;
-  private $player2Name;
-
-  private $player1Points;
-  private $player2Points;
+  private $player1;
+  private $player2;
 
   public function __construct($player1Name, $player2Name)
   {
-    $this->player1Name = $player1Name;
-    $this->player2Name = $player2Name;
+    $this->player1 = new Player($player1Name);
+    $this->player2 = new Player($player2Name);
+  }
 
-    $this->player1Points = 0;
-    $this->player2Points = 0;
+  public function hasPlayer1MorePoints()
+  {
+    return $this->player1->getScore() > $this->player2->getScore();
   }
 
   public function status()
   {
     if($this->isSomeoneTheWinner())
-    {
-      if($this->player1Points > $this->player2Points)
-        return $this->player1Name . ' wins!';
-        
-      return $this->player2Name . ' wins!';
-    }
+      return $this->getPlayerNameWithMorePoints() . ' wins!';
     
-    $nextServerName = $this->calcolateNextServerName();
+    $nextServerName = $this->retrieveNextServerName();
       
     return sprintf(
       "[%d - %d] Ball to %s",
-      $this->player1Points,
-      $this->player2Points,
+      $this->player1->getScore(),
+      $this->player2->getScore(),
       $nextServerName
     );
   }
 
   private function isSomeoneTheWinner()
   {
-    return $this->isSomeoneOverTen() && $this->hasSomeoneTwoPointsAhead();
+    return
+      $this->isSomeoneOverWinThreshold() &&
+      $this->hasSomeoneTwoPointsAhead();
   }
 
-  private function isSomeoneOverTen()
+  private function getPlayerNameWithMorePoints()
   {
-    return $this->player1Points > 10 || $this->player2Points > 10;
+    if($this->hasPlayer1MorePoints())
+      return $this->player1->getName();
+      
+    return $this->player2->getName();
+  }
+
+  private function isSomeoneOverWinThreshold()
+  {
+    return
+      $this->player1->isOverWinThreshold() ||
+      $this->player2->isOverWinThreshold();
   }
 
   private function hasSomeoneTwoPointsAhead() 
   {
-    return abs($this->player1Points - $this->player2Points) > 1;
+    return abs(
+      $this->player1->getScore() - $this->player2->getScore()
+    ) > 1;
   }
 
-  private function calcolateNextServerName()
+  private function retrieveNextServerName()
   {
     return $this->isPlayerOneServer() ?
-      $this->player1Name : $this->player2Name;
+      $this->player1->getName() : $this->player2->getName();
   }
   
   private function isPlayerOneServer()
   {
-    $pointsSum = $this->player1Points + $this->player2Points;
+    $pointsSum = $this->player1->getScore() + $this->player2->getScore();
 
-    if($this->isSomeoneOverTen())
+    if($this->isSomeoneOverWinThreshold())
       return (($pointsSum % 2) == 0); 
 
     return ((($pointsSum / 2) % 2) == 0);
@@ -70,9 +80,9 @@ class TableTennisMatch
 
   public function point($playerName)
   {
-    if($playerName == $this->player1Name)
-      $this->player1Points++;
+    if($this->player1->hasThisName($playerName))
+      $this->player1->score();
     else
-      $this->player2Points++;
+      $this->player2->score();
   }
 }
