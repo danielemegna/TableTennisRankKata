@@ -108,5 +108,46 @@ class TableTennisRankTest extends PHPUnit_Framework_TestCase
 
     $this->assertEquals("Pluto wins!", $this->match->status());
   }
+
+  public function test_match_ten_at_ten_goes_to_advantage()
+  {
+    $this->initMatch("Pippo", "Pluto");
+
+    $this->match->point("Pippo");
+    $this->match->point("Pippo");
+    $this->match->point("Pippo");
+    $this->match->point("Pippo");
+    $this->match->point("Pippo");
+    $this->match->point("Pippo");
+    $this->match->point("Pippo");
+    $this->match->point("Pippo");
+    $this->match->point("Pippo");
+    $this->match->point("Pippo");
+
+    $this->match->point("Pluto");
+    $this->match->point("Pluto");
+    $this->match->point("Pluto");
+    $this->match->point("Pluto");
+    $this->match->point("Pluto");
+    $this->match->point("Pluto");
+    $this->match->point("Pluto");
+    $this->match->point("Pluto");
+    $this->match->point("Pluto");
+    $this->match->point("Pluto");
+
+    $this->assertEquals("[10 - 10] Ball to Pippo", $this->match->status());
+    
+    $this->match->point("Pippo");
+    $this->assertEquals("[11 - 10] Ball to Pluto", $this->match->status());
+    
+    $this->match->point("Pluto");
+    $this->assertEquals("[11 - 11] Ball to Pippo", $this->match->status());
+
+    $this->match->point("Pippo");
+    $this->assertEquals("[12 - 11] Ball to Pluto", $this->match->status());
+
+    $this->match->point("Pippo");
+    $this->assertEquals("Pippo wins!", $this->match->status());
+  }
   
 }

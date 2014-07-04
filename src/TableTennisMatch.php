@@ -19,10 +19,13 @@ class TableTennisMatch
 
   public function status()
   {
-    if($this->player1Points > 10)
-      return $this->player1Name . ' wins!';
-    if($this->player2Points > 10)
+    if($this->isSomeoneTheWinner())
+    {
+      if($this->player1Points > $this->player2Points)
+        return $this->player1Name . ' wins!';
+        
       return $this->player2Name . ' wins!';
+    }
     
     $nextServerName = $this->calcolateNextServerName();
       
@@ -34,6 +37,21 @@ class TableTennisMatch
     );
   }
 
+  private function isSomeoneTheWinner()
+  {
+    return $this->isSomeoneOverTen() && $this->hasSomeoneTwoPointsAhead();
+  }
+
+  private function isSomeoneOverTen()
+  {
+    return $this->player1Points > 10 || $this->player2Points > 10;
+  }
+
+  private function hasSomeoneTwoPointsAhead() 
+  {
+    return abs($this->player1Points - $this->player2Points) > 1;
+  }
+
   private function calcolateNextServerName()
   {
     return $this->isPlayerOneServer() ?
@@ -43,6 +61,10 @@ class TableTennisMatch
   private function isPlayerOneServer()
   {
     $pointsSum = $this->player1Points + $this->player2Points;
+
+    if($this->isSomeoneOverTen())
+      return (($pointsSum % 2) == 0); 
+
     return ((($pointsSum / 2) % 2) == 0);
   }
 
